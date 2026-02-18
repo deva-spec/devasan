@@ -125,3 +125,11 @@ main {
     width: 100%;
   }
 }
+
+.hidden {
+  display: none;
+}
+
+.steps ul {
+  margin-left: 15px;
+}
