@@ -14,44 +14,122 @@ const recipes = [
 ];
 
 // ==========================
-// Select Container
+// State
 // ==========================
+
+let currentFilter = "all";
+let currentSort = "none";
 
 const recipeContainer = document.querySelector("#recipe-container");
 
 // ==========================
-// Create Recipe Card
+// Create Card
 // ==========================
 
-const createRecipeCard = (recipe) => {
-  return `
-    <div class="recipe-card" data-id="${recipe.id}">
-      <h3>${recipe.title}</h3>
-      <div class="recipe-meta">
-        <span>⏱️ ${recipe.time} min</span>
-        <span class="difficulty ${recipe.difficulty}">
-          ${recipe.difficulty}
-        </span>
-      </div>
-      <p>${recipe.description}</p>
+const createRecipeCard = (recipe) => `
+  <div class="recipe-card">
+    <h3>${recipe.title}</h3>
+    <div class="recipe-meta">
+      <span>⏱️ ${recipe.time} min</span>
+      <span class="difficulty ${recipe.difficulty}">
+        ${recipe.difficulty}
+      </span>
     </div>
-  `;
-};
+    <p>${recipe.description}</p>
+  </div>
+`;
 
 // ==========================
-// Render Recipes
+// Render
 // ==========================
 
 const renderRecipes = (recipesArray) => {
-  const cardsHTML = recipesArray
-    .map(recipe => createRecipeCard(recipe))
+  recipeContainer.innerHTML = recipesArray
+    .map(createRecipeCard)
     .join("");
-
-  recipeContainer.innerHTML = cardsHTML;
 };
 
 // ==========================
-// Initialize App
+// Pure Filter
 // ==========================
 
-renderRecipes(recipes);
+const filterRecipes = (recipesArray, filter) => {
+  switch (filter) {
+    case "easy":
+    case "medium":
+    case "hard":
+      return recipesArray.filter(r => r.difficulty === filter);
+
+    case "quick":
+      return recipesArray.filter(r => r.time < 30);
+
+    default:
+      return [...recipesArray];
+  }
+};
+
+// ==========================
+// Pure Sort
+// ==========================
+
+const sortRecipes = (recipesArray, sortType) => {
+  const sorted = [...recipesArray];
+
+  switch (sortType) {
+    case "name":
+      return sorted.sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
+
+    case "time":
+      return sorted.sort((a, b) => a.time - b.time);
+
+    default:
+      return sorted;
+  }
+};
+
+// ==========================
+// Update Display
+// ==========================
+
+const updateDisplay = () => {
+  const filtered = filterRecipes(recipes, currentFilter);
+  const sorted = sortRecipes(filtered, currentSort);
+  renderRecipes(sorted);
+};
+
+// ==========================
+// Button Helpers
+// ==========================
+
+const setActiveButton = (buttons, clicked) => {
+  buttons.forEach(btn => btn.classList.remove("active"));
+  clicked.classList.add("active");
+};
+
+// FILTER BUTTONS
+const filterButtons = document.querySelectorAll("[data-filter]");
+filterButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    currentFilter = button.dataset.filter;
+    setActiveButton(filterButtons, button);
+    updateDisplay();
+  });
+});
+
+// SORT BUTTONS
+const sortButtons = document.querySelectorAll("[data-sort]");
+sortButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    currentSort = button.dataset.sort;
+    setActiveButton(sortButtons, button);
+    updateDisplay();
+  });
+});
+
+// ==========================
+// Initialize
+// ==========================
+
+updateDisplay();
